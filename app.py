@@ -1,32 +1,42 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import requests
+import os
+
+app = Flask(__name__)
+CORS(app)
+
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json
     user_input = data.get("message")
     chosen_model = data.get("model", "open-mistral-7b")
-    image_data = data.get("image") # De base64 string van de website
+    image_data = data.get("image")
 
     content = []
     if user_input:
         content.append({"type": "text", "text": user_input})
     
     if image_data:
-        # Mistral verwacht de afbeelding in dit formaat
         content.append({
             "type": "image_url",
-            "image_url": image_data # Bevat data:image/jpeg;base64,...
+            "image_url": image_data
         })
 
     payload = {
         "model": chosen_model,
         "messages": [{"role": "user", "content": content}]
     }
-    
-    # ... de rest van je requests.post blijft hetzelfde ...
 
-**Wat er nu gebeurt:**
-1.  Je selecteert **Pixtral** bovenaan.
-2.  Je klikt op de **+** en kiest een foto.
-3.  Je typt een vraag (bijv: "Wat zie je op deze foto?").
-4.  De website maakt er een pakketje van en stuurt het naar Render, die het doorgeeft aan Mistral.
+    headers = {
+        "Authorization": f"Bearer {MISTRAL_API_KEY}",
+        "Content-Type": "application/json"
+    }
 
-Super cool om dit in je eigen trajectklas-app te hebben! Laat je het weten als het uploaden lukt?
+    response = requests.post("https://api.mistral.ai/v1/chat/completions", json=payload, headers=headers)
+    return jsonify(response.json())
+
+if __name__ == '__main__':
+    app.run(debug=True)

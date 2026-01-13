@@ -2,19 +2,31 @@
 def chat():
     data = request.json
     user_input = data.get("message")
-    # Pak het model dat de website stuurt, of gebruik de standaard 'open-mistral-7b'
     chosen_model = data.get("model", "open-mistral-7b")
-    
-    headers = {
-        "Authorization": f"Bearer {MISTRAL_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "model": chosen_model, # Hier gebruiken we nu het gekozen model!
-        "messages": [{"role": "user", "content": user_input}]
-    }
-    
-    # ... de rest van je code blijft hetzelfde ...
+    image_data = data.get("image") # De base64 string van de website
 
-Zodra je dit op GitHub opslaat, buildt Render hem opnieuw en kun je direct wisselen tussen modellen in je nieuwe interface! Let wel op: krachtigere modellen zoals `medium` kunnen iets langer duren om te antwoorden.
+    content = []
+    if user_input:
+        content.append({"type": "text", "text": user_input})
+    
+    if image_data:
+        # Mistral verwacht de afbeelding in dit formaat
+        content.append({
+            "type": "image_url",
+            "image_url": image_data # Bevat data:image/jpeg;base64,...
+        })
+
+    payload = {
+        "model": chosen_model,
+        "messages": [{"role": "user", "content": content}]
+    }
+    
+    # ... de rest van je requests.post blijft hetzelfde ...
+
+**Wat er nu gebeurt:**
+1.  Je selecteert **Pixtral** bovenaan.
+2.  Je klikt op de **+** en kiest een foto.
+3.  Je typt een vraag (bijv: "Wat zie je op deze foto?").
+4.  De website maakt er een pakketje van en stuurt het naar Render, die het doorgeeft aan Mistral.
+
+Super cool om dit in je eigen trajectklas-app te hebben! Laat je het weten als het uploaden lukt?

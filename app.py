@@ -1,17 +1,9 @@
-import os
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import requests
-
-app = Flask(__name__)
-CORS(app) # Cruciaal voor je website!
-
-MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
-
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json
     user_input = data.get("message")
+    # Pak het model dat de website stuurt, of gebruik de standaard 'open-mistral-7b'
+    chosen_model = data.get("model", "open-mistral-7b")
     
     headers = {
         "Authorization": f"Bearer {MISTRAL_API_KEY}",
@@ -19,12 +11,10 @@ def chat():
     }
     
     payload = {
-        "model": "open-mistral-7b",
+        "model": chosen_model, # Hier gebruiken we nu het gekozen model!
         "messages": [{"role": "user", "content": user_input}]
     }
     
-    response = requests.post("https://api.mistral.ai/v1/chat/completions", json=payload, headers=headers)
-    return jsonify(response.json())
+    # ... de rest van je code blijft hetzelfde ...
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=10000)
+Zodra je dit op GitHub opslaat, buildt Render hem opnieuw en kun je direct wisselen tussen modellen in je nieuwe interface! Let wel op: krachtigere modellen zoals `medium` kunnen iets langer duren om te antwoorden.

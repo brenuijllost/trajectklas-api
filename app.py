@@ -120,7 +120,7 @@ HTML_INTERFACE = """
                     body: JSON.stringify({
                         message: message,
                         history: history,
-                        model: "open-mistral-7b"
+                        model: "mistral-large-latest"
                     })
                 });
 
